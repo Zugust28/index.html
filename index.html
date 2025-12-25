@@ -1,235 +1,238 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <base target="_top">
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #1DB446; /* LINE Green */
-      --bg-color: #f8f9fa;
-      --text-color: #333;
-    }
-    body {
-      font-family: 'Kanit', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .container {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-      width: 100%;
-      max-width: 400px;
-      box-sizing: border-box;
-    }
-    h2 {
-      text-align: center;
-      color: var(--primary-color);
-      margin-top: 0;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    label {
-      font-weight: 500;
-      display: block;
-      margin-bottom: 8px;
-    }
-    .checkbox-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .checkbox-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .checkbox-item input {
-      width: 18px;
-      height: 18px;
-    }
-    textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-family: 'Kanit', sans-serif;
-      box-sizing: border-box;
-      resize: vertical;
-    }
-    textarea:focus {
-      outline: none;
-      border-color: var(--primary-color);
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    button:active {
-      transform: scale(0.98);
-    }
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    #statusMessage {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
-      display: none;
-    }
-    .loading {
-      opacity: 0.7;
-      pointer-events: none;
-    }
-  </style>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Symptom Check</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ... (Same Styles as before) ... */
+        :root {
+            --primary-color: #1DB446;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-item input {
+            width: 18px;
+            height: 18px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Kanit', sans-serif;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #statusMessage {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+    </style>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
+
 <body>
 
-<div class="container" id="formContainer">
-  <h2>บันทึกอาการ</h2>
-  <form id="symptomForm">
-    
-    <div class="form-group">
-      <label>วันนี้คุณมีอาการเหล่านี้หรือไม่?</label>
-      <div class="checkbox-group">
-        <label class="checkbox-item">
-          <input type="checkbox" name="symptoms" value="ไม่มีอาการผิดปกติ">
-          ปกติ สบายดี
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" name="symptoms" value="ปวด/บวมเล็กน้อย">
-          ปวด/บวม เล็กน้อย
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" name="symptoms" value="มีไข้">
-          มีไข้
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" name="symptoms" value="แผลมีเลือดซึม">
-          แผลมีเลือดซึม
-        </label>
-      </div>
+    <div class="container" id="formContainer">
+        <h2>บันทึกอาการ</h2>
+        <form id="symptomForm">
+            <div class="form-group">
+                <label>วันนี้คุณมีอาการเหล่านี้หรือไม่?</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" name="symptoms" value="ไม่มีอาการผิดปกติ"> ปกติ
+                        สบายดี</label>
+                    <label class="checkbox-item"><input type="checkbox" name="symptoms" value="ปวด/บวมเล็กน้อย"> ปวด/บวม
+                        เล็กน้อย</label>
+                    <label class="checkbox-item"><input type="checkbox" name="symptoms" value="มีไข้"> มีไข้</label>
+                    <label class="checkbox-item"><input type="checkbox" name="symptoms" value="แผลมีเลือดซึม">
+                        แผลมีเลือดซึม</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="comment">ข้อกังวลอื่นๆ หรือรายละเอียดเพิ่มเติม</label>
+                <textarea id="comment" name="comment" rows="4" placeholder="พิมพ์ข้อความของคุณที่นี่..."></textarea>
+            </div>
+            <button type="submit" id="submitBtn">ส่งข้อมูล</button>
+        </form>
+        <div id="statusMessage"></div>
     </div>
 
-    <div class="form-group">
-      <label for="comment">ข้อกังวลอื่นๆ หรือรายละเอียดเพิ่มเติม</label>
-      <textarea id="comment" name="comment" rows="4" placeholder="พิมพ์ข้อความของคุณที่นี่..."></textarea>
-    </div>
+    <script>
+        // -------------------------------------------------------------
+        // CONFIGURATION: แก้ไข 2 บรรทัดนี้ครับ
+        // -------------------------------------------------------------
+        const LIFF_ID = "YOUR_LIFF_ID_HERE"; // ใส่ LIFF ID ที่นี่ (เช่น 2007...-xxxx)
+        const GAS_EXEC_URL = "YOUR_WEB_APP_URL_HERE"; // ใส่ Web App URL ของคุณที่นี่ (ที่ลงท้ายด้วย /exec)
+        // -------------------------------------------------------------
 
-    <button type="submit" id="submitBtn">ส่งข้อมูล</button>
-  </form>
-  <div id="statusMessage"></div>
-</div>
+        window.onload = function () {
+            liff.init({ liffId: LIFF_ID })
+                .then(() => {
+                    if (!liff.isLoggedIn()) {
+                        liff.login();
+                    }
+                })
+                .catch((err) => {
+                    console.error('LIFF Init failed', err);
+                    showError('LIFF Init Failed: ' + err);
+                });
+        };
 
-<script>
-  // Initialize LIFF
-  // Note during setup: User MUST create LIFF App and put ID here if running standalone,
-  // but usually we can pass it or just let liff.init() find it from the context if properly linked.
-  // For standard LIFF, we usually need the ID.
-  
-  // !! IMPORTANT: The actual LIFF ID typically needs to be passed or hardcoded during the setup.
-  // For this template, we will rely on liff.init() without ID first
-  // if the page is opened via liff URL schema like https://liff.line.me/{LIFF_ID}.
-  // Or we can try to fetch it from GAS if we injected it.
-  
-  window.onload = function() {
-    liff.init({ liffId: "2007784481-qWTVx4hJ" }) // User needs to replace this!
-      .then(() => {
-        if (!liff.isLoggedIn()) {
-          liff.login();
+        document.getElementById('symptomForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+
+            btn.textContent = 'กำลังส่ง...';
+            btn.classList.add('loading');
+
+            const formData = new FormData(e.target);
+            const symptoms = formData.getAll('symptoms');
+            const comment = formData.get('comment');
+
+            liff.getProfile().then(profile => {
+                const data = {
+                    userId: profile.userId,
+                    symptoms: symptoms,
+                    comment: comment
+                };
+
+                // ใช้ fetch ส่งข้อมูลไปที่ GAS แทน google.script.run
+                // mode: 'no-cors' จำเป็นมากเพื่อไม่ให้ติด CORS Block จาก Google
+                fetch(GAS_EXEC_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8' // ส่งเป็น text เพื่อหลีกเลี่ยง Preflight check
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(() => {
+                        // เนื่องจาก no-cors เราจะไม่รู้ว่าสำเร็จจริงไหม แต่ถ้าไม่มี error network ก็ถือว่าส่งไปแล้ว
+                        // เราจะ assume ว่าสำเร็จ
+                        btn.textContent = 'เรียบร้อย!';
+                        showSuccess('บันทึกข้อมูลเรียบร้อยแล้วค่ะ ปิดหน้าต่างได้เลย');
+                        setTimeout(() => { liff.closeWindow(); }, 2000);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        btn.textContent = 'ลองใหม่';
+                        btn.classList.remove('loading');
+                        showError('เกิดข้อผิดพลาดในการส่งข้อมูล: ' + error);
+                    });
+
+            }).catch(err => {
+                showError('ไม่สามารถดึงข้อมูลผู้ใช้ LINE ได้: ' + err);
+            });
+        });
+
+        function showError(msg) {
+            const el = document.getElementById('statusMessage');
+            el.innerText = msg;
+            el.style.display = 'block';
+            el.style.color = 'red';
         }
-      })
-      .catch((err) => {
-        console.error('LIFF Init failed', err);
-        document.getElementById('statusMessage').innerText = 'Error initializing LIFF: ' + err;
-        document.getElementById('statusMessage').style.display = 'block';
-        document.getElementById('statusMessage').style.color = 'red';
-      });
-  };
 
-  document.getElementById('symptomForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    const statusMsg = document.getElementById('statusMessage');
-    
-    btn.textContent = 'กำลังส่ง...';
-    btn.classList.add('loading');
-
-    // Gather data
-    const formData = new FormData(e.target);
-    const symptoms = formData.getAll('symptoms');
-    const comment = formData.get('comment');
-
-    liff.getProfile().then(profile => {
-      const data = {
-        userId: profile.userId,
-        symptoms: symptoms,
-        comment: comment
-      };
-
-      // Send to GAS
-      // We use `google.script.run` for GAS Web App communications generally,
-      // BUT `google.script.run` only works if serving HTML directly inside an iframe or dialog within GAS context (like Sheet sidebar).
-      // Since LIFF is an external window loading the GAS Web App URL, standard fetch to the GAS Web App URL (doPost) is safer/more universal for LIFF.
-      // HOWEVER, GAS Web Apps have CORS issues when called from fetch() in browser.
-      // OPTION A: Use `google.script.run` if we are sure it's served by GAS domain.
-      // OPTION B: Submit as a form post to a hidden iframe (old school) to avoid CORS?
-      // OPTION C: JSONP? (Deprecated)
-      // OPTION D: `fetch` with 'no-cors' mode (opaque response, can't read success status).
-      
-      // BEST PRACTICE FOR LIFF + GAS:
-      // Since the LIFF page IS generated by the `doGet` of the GAS Web App, 
-      // `google.script.run` IS available and is the best way!
-      
-      google.script.run
-        .withSuccessHandler(function(response) {
-          btn.textContent = 'เรียบร้อย!';
-          statusMsg.innerText = 'บันทึกข้อมูลเรียบร้อยแล้วค่ะ ปิดหน้าต่างได้เลย';
-          statusMsg.style.display = 'block';
-          statusMsg.style.color = 'green';
-          
-          setTimeout(() => {
-            liff.closeWindow();
-          }, 2000);
-        })
-        .withFailureHandler(function(error) {
-          btn.textContent = 'ลองใหม่';
-          btn.classList.remove('loading');
-          statusMsg.innerText = 'เกิดข้อผิดพลาด: ' + error.message;
-          statusMsg.style.display = 'block';
-          statusMsg.style.color = 'red';
-        })
-        .doPost({ postData: { contents: JSON.stringify(data) } }); 
-        // Note: Calling doPost directly via google.script.run is a clever hack
-        // to reuse logic, OR we can make a dedicated server-side function handleForm(data).
-        // Let's assume we change Code.gs to expose a `processForm(data)` function instead of `doPost` for `google.script.run`.
-        
-    }).catch(err => {
-      alert('Error getting profile: ' + err);
-    });
-  });
-</script>
+        function showSuccess(msg) {
+            const el = document.getElementById('statusMessage');
+            el.innerText = msg;
+            el.style.display = 'block';
+            el.style.color = 'green';
+        }
+    </script>
 
 </body>
+
 </html>
