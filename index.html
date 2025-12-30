@@ -1,235 +1,426 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <base target="_top">
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #1DB446; /* LINE Green */
-      --bg-color: #f8f9fa;
-      --text-color: #333;
-    }
-    body {
-      font-family: 'Kanit', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .container {
-      background: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-      width: 100%;
-      max-width: 400px;
-      box-sizing: border-box;
-    }
-    h2 {
-      text-align: center;
-      color: var(--primary-color);
-      margin-top: 0;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    label {
-      font-weight: 500;
-      display: block;
-      margin-bottom: 8px;
-    }
-    .checkbox-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .checkbox-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .checkbox-item input {
-      width: 18px;
-      height: 18px;
-    }
-    textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-family: 'Kanit', sans-serif;
-      box-sizing: border-box;
-      resize: vertical;
-    }
-    textarea:focus {
-      outline: none;
-      border-color: var(--primary-color);
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    button:active {
-      transform: scale(0.98);
-    }
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    #statusMessage {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
-      display: none;
-    }
-    .loading {
-      opacity: 0.7;
-      pointer-events: none;
-    }
-  </style>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Symptom Check</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1DB446;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            display: none;
+            /* Hide all by default */
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        h3 {
+            margin: 10px 0;
+            color: #555;
+        }
+
+        p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        /* Views */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Kanit', sans-serif;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            text-align: center;
+            padding: 20px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .profile-detail {
+            text-align: left;
+            margin-top: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #888;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: #333;
+        }
+
+        /* Loading */
+        #loadingView {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
+
 <body>
 
-<div class="container" id="formContainer">
-  <h2>บันทึกอาการ</h2>
-  <form id="symptomForm">
-    
-    <div class="form-group">
-      <label>อาการหลังทำหัตถการ</label>
-      <div class="checkbox-group">
-        <label class="checkbox-item">
-          <input type="checkbox" name="symptoms" value="ไม่มีอาการผิดปกติ">
-          ไม่มีอะไรผิดปกติ
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" name="symptoms" value="ปวด/บวมเล็กน้อย">
-          ปวด/บวม เล็กน้อย
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" name="symptoms" value="มีไข้">
-          มีรอยเข็ม
-        </label>
-        <label class="checkbox-item">
-          <input type="checkbox" name="symptoms" value="แผลมีเลือดซึม">
-          มีรอยเขียวช้ำ
-        </label>
-      </div>
+    <!-- Main Container -->
+    <div class="container" id="mainContainer" style="display: block;">
+
+        <!-- View 1: Loading -->
+        <div id="loadingView" class="view-section active">
+            <div class="spinner"></div>
+            <p>กำลังโหลดข้อมูล...</p>
+        </div>
+
+        <!-- View 2: Register (Enter Phone) -->
+        <div id="registerView" class="view-section">
+            <h2>ลงทะเบียนครั้งแรก</h2>
+            <p style="text-align: center; margin-bottom: 20px;">กรุณากรอกเบอร์โทรศัพท์ที่ให้ไว้กับคลินิก
+                เพื่อยืนยันตัวตน</p>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="phone">เบอร์โทรศัพท์</label>
+                    <input type="tel" id="phone" name="phone" placeholder="ตัวอย่าง: 0812345678" required>
+                </div>
+                <div id="regError" style="color: red; text-align: center; display: none; margin-bottom: 10px;"></div>
+                <button type="submit" id="regBtn">ตรวจสอบและยืนยัน</button>
+            </form>
+        </div>
+
+        <!-- View 3: Profile Confirmation -->
+        <div id="profileView" class="view-section">
+            <h2>ข้อมูลลูกค้า</h2>
+            <div class="profile-card">
+                <div style="font-size: 40px; margin-bottom: 10px;">📋</div>
+                <h3 id="profName">-</h3>
+                <p id="profHN">HN: -</p>
+                <div class="profile-detail">
+                    <div class="detail-row"><span class="detail-label">ชื่อเล่น:</span> <span class="detail-value"
+                            id="profNick">-</span></div>
+                    <div class="detail-row"><span class="detail-label">วันเกิด:</span> <span class="detail-value"
+                            id="profDOB">-</span></div>
+                </div>
+            </div>
+            <button id="startBtn">ติดตามอาการ</button>
+        </div>
+
+        <!-- View 4: Symptom Form -->
+        <div id="formView" class="view-section">
+            <h2>บันทึกอาการ</h2>
+            <form id="symptomForm">
+                <div class="form-group">
+                    <label>วันนี้คุณมีอาการเหล่านี้หรือไม่?</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" name="symptoms"
+                                value="ปกติ ไม่มีอาการอื่นเพิ่มเติม"> ปกติ ไม่มีอาการอื่นเพิ่มเติม</label>
+                        <label class="checkbox-item"><input type="checkbox" name="symptoms" value="ปวด/บวม เล็กน้อย">
+                            ปวด/บวม เล็กน้อย</label>
+                        <label class="checkbox-item"><input type="checkbox" name="symptoms" value="มีรอยเข็ม/เขียวช้ำ">
+                            มีรอยเข็ม/เขียวช้ำ</label>
+                        <label class="checkbox-item"><input type="checkbox" name="symptoms" value="แผลมีเลือดซึม">
+                            แผลมีเลือดซึม</label>
+                        <label class="checkbox-item"><input type="checkbox" name="symptoms" value="ยังระบมอยู่">
+                            ยังระบมอยู่</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="comment">ข้อกังวลอื่นๆ หรือรายละเอียดเพิ่มเติม</label>
+                    <textarea id="comment" name="comment" rows="4" placeholder="พิมพ์ข้อความของคุณที่นี่..."></textarea>
+                </div>
+                <button type="submit" id="submitBtn">ส่งข้อมูล</button>
+            </form>
+        </div>
+
+        <!-- Success Message -->
+        <div id="successView" class="view-section" style="text-align: center;">
+            <div style="font-size: 50px; color: var(--primary-color); margin-bottom: 20px;">✅</div>
+            <h2>บันทึกเรียบร้อย</h2>
+            <p>ขอบคุณที่ให้ข้อมูลค่ะ</p>
+        </div>
+
     </div>
 
-    <div class="form-group">
-      <label for="comment">ข้อกังวลอื่นๆ หรือรายละเอียดเพิ่มเติม</label>
-      <textarea id="comment" name="comment" rows="4" placeholder="พิมพ์ข้อความของคุณที่นี่..."></textarea>
-    </div>
+    <script>
+        // --- CONFIGURATION ---
+        const LIFF_ID = "2007784481-qWTVx4hJ";
+        const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycbxubT98Gp5bgj93l_QN9M1KB36BBGPRkcyEBhlhtqV8oxFrrRVjruCwwegJYPLWv4de0Q/exec"
 
-    <button type="submit" id="submitBtn">ส่งข้อมูล</button>
-  </form>
-  <div id="statusMessage"></div>
-</div>
+        // State
+        let currentUserId = null;
 
-<script>
-  // Initialize LIFF
-  // Note during setup: User MUST create LIFF App and put ID here if running standalone,
-  // but usually we can pass it or just let liff.init() find it from the context if properly linked.
-  // For standard LIFF, we usually need the ID.
-  
-  // !! IMPORTANT: The actual LIFF ID typically needs to be passed or hardcoded during the setup.
-  // For this template, we will rely on liff.init() without ID first
-  // if the page is opened via liff URL schema like https://liff.line.me/{LIFF_ID}.
-  // Or we can try to fetch it from GAS if we injected it.
-  
-  window.onload = function() {
-    liff.init({ liffId: "2007784481-qWTVx4hJ" }) // User needs to replace this!
-      .then(() => {
-        if (!liff.isLoggedIn()) {
-          liff.login();
+        // Navigation Helper
+        function showView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
         }
-      })
-      .catch((err) => {
-        console.error('LIFF Init failed', err);
-        document.getElementById('statusMessage').innerText = 'Error initializing LIFF: ' + err;
-        document.getElementById('statusMessage').style.display = 'block';
-        document.getElementById('statusMessage').style.color = 'red';
-      });
-  };
 
-  document.getElementById('symptomForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('submitBtn');
-    const statusMsg = document.getElementById('statusMessage');
-    
-    btn.textContent = 'กำลังส่ง...';
-    btn.classList.add('loading');
+        // --- 1. INITIALIZATION ---
+        window.onload = function () {
+            liff.init({ liffId: LIFF_ID })
+                .then(() => {
+                    if (!liff.isLoggedIn()) {
+                        liff.login();
+                    } else {
+                        liff.getProfile().then(profile => {
+                            currentUserId = profile.userId;
+                            checkRegistrationStatus(profile.userId);
+                        });
+                    }
+                })
+                .catch((err) => {
+                    console.error('LIFF Init failed', err);
+                    alert('LIFF Error: ' + err);
+                });
+        };
 
-    // Gather data
-    const formData = new FormData(e.target);
-    const symptoms = formData.getAll('symptoms');
-    const comment = formData.get('comment');
+        // --- 2. CHECK STATUS ---
+        function checkRegistrationStatus(uid) {
+            fetch(GAS_EXEC_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'check_status', userId: uid })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.registered && data.profile) {
+                        // Registered -> Show Profile
+                        updateProfileUI(data.profile);
+                        showView('profileView');
+                    } else {
+                        // Not registered -> Show Register
+                        showView('registerView');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    // Fallback: If error, maybe show register to be safe?
+                    alert('Connection Error. Please try refreshing.');
+                });
+        }
 
-    liff.getProfile().then(profile => {
-      const data = {
-        userId: profile.userId,
-        symptoms: symptoms,
-        comment: comment
-      };
+        function updateProfileUI(profile) {
+            document.getElementById('profName').innerText = profile.name || 'ไม่ระบุชื่อ';
+            document.getElementById('profHN').innerText = 'HN: ' + (profile.hn || '-');
+            document.getElementById('profNick').innerText = profile.nickname || '-';
+            document.getElementById('profDOB').innerText = profile.dob || '-';
+        }
 
-      // Send to GAS
-      // We use `google.script.run` for GAS Web App communications generally,
-      // BUT `google.script.run` only works if serving HTML directly inside an iframe or dialog within GAS context (like Sheet sidebar).
-      // Since LIFF is an external window loading the GAS Web App URL, standard fetch to the GAS Web App URL (doPost) is safer/more universal for LIFF.
-      // HOWEVER, GAS Web Apps have CORS issues when called from fetch() in browser.
-      // OPTION A: Use `google.script.run` if we are sure it's served by GAS domain.
-      // OPTION B: Submit as a form post to a hidden iframe (old school) to avoid CORS?
-      // OPTION C: JSONP? (Deprecated)
-      // OPTION D: `fetch` with 'no-cors' mode (opaque response, can't read success status).
-      
-      // BEST PRACTICE FOR LIFF + GAS:
-      // Since the LIFF page IS generated by the `doGet` of the GAS Web App, 
-      // `google.script.run` IS available and is the best way!
-      
-      google.script.run
-        .withSuccessHandler(function(response) {
-          btn.textContent = 'เรียบร้อย!';
-          statusMsg.innerText = 'บันทึกข้อมูลเรียบร้อยแล้วครับ ปิดหน้าต่างได้เลย';
-          statusMsg.style.display = 'block';
-          statusMsg.style.color = 'green';
-          
-          setTimeout(() => {
-            liff.closeWindow();
-          }, 2000);
-        })
-        .withFailureHandler(function(error) {
-          btn.textContent = 'ลองใหม่';
-          btn.classList.remove('loading');
-          statusMsg.innerText = 'เกิดข้อผิดพลาด: ' + error.message;
-          statusMsg.style.display = 'block';
-          statusMsg.style.color = 'red';
-        })
-        .doPost({ postData: { contents: JSON.stringify(data) } }); 
-        // Note: Calling doPost directly via google.script.run is a clever hack
-        // to reuse logic, OR we can make a dedicated server-side function handleForm(data).
-        // Let's assume we change Code.gs to expose a `processForm(data)` function instead of `doPost` for `google.script.run`.
-        
-    }).catch(err => {
-      alert('Error getting profile: ' + err);
-    });
-  });
-</script>
+        // --- 3. HANDLE REGISTRATION SUBMIT ---
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const phone = document.getElementById('phone').value;
+            const btn = document.getElementById('regBtn');
+            const errDiv = document.getElementById('regError');
 
+            btn.disabled = true;
+            btn.innerText = 'กำลังตรวจสอบ...';
+            errDiv.style.display = 'none';
+
+            fetch(GAS_EXEC_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'register', userId: currentUserId, phone: phone })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.profile) {
+                        // Success -> Go to Profile
+                        updateProfileUI(data.profile);
+                        showView('profileView');
+                    } else {
+                        // Failed
+                        errDiv.innerText = 'ไม่พบเบอร์โทรศัพท์ในระบบ หรือเบอร์ไม่ถูกต้อง';
+                        errDiv.style.display = 'block';
+                        btn.disabled = false;
+                        btn.innerText = 'ตรวจสอบและยืนยัน';
+                    }
+                })
+                .catch(err => {
+                    errDiv.innerText = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+                    errDiv.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerText = 'ตรวจสอบและยืนยัน';
+                });
+        });
+
+        // --- 4. HANDLE PROFILE "START" ---
+        document.getElementById('startBtn').addEventListener('click', function () {
+            showView('formView');
+        });
+
+        // --- 5. HANDLE SYMPTOM SUBMIT ---
+        document.getElementById('symptomForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = 'กำลังส่ง...';
+            btn.disabled = true;
+
+            const formData = new FormData(e.target);
+            const data = {
+                action: 'submit',
+                userId: currentUserId,
+                symptoms: formData.getAll('symptoms'),
+                comment: formData.get('comment')
+            };
+
+            fetch(GAS_EXEC_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(data)
+            })
+                .then(() => {
+                    showView('successView');
+                    setTimeout(() => { liff.closeWindow(); }, 3000);
+                })
+                .catch(error => {
+                    alert('Error: ' + error);
+                    btn.disabled = false;
+                    btn.innerText = 'ส่งข้อมูล';
+                });
+        });
+
+    </script>
 </body>
+
 </html>
