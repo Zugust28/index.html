@@ -320,21 +320,26 @@
                 .then(() => {
                     // Specific View Logic
                     if (viewParam === 'gift') {
-                        // Calculate Expiry Date (Today + 1 Month)
-                        const today = new Date();
-                        const nextMonth = new Date(today);
-                        nextMonth.setMonth(today.getMonth() + 1);
+                        // Check if Expiry passed from URL
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const expParam = urlParams.get('exp');
 
-                        // Format Date (Thai)
-                        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-                        // Add 543 for Thai Year if needed, but standard locale usually handles it if locale is th-TH-u-nu-latn or similar. 
-                        // Let's do manual mapping for safety across browsers.
-                        const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-                        const day = nextMonth.getDate();
-                        const month = months[nextMonth.getMonth()];
-                        const year = nextMonth.getFullYear() + 543;
+                        if (expParam) {
+                            document.getElementById('giftExpiryDate').innerText = expParam;
+                        } else {
+                            // Fallback: Calculate Expiry Date (Today + 1 Month)
+                            const today = new Date();
+                            const nextMonth = new Date(today);
+                            nextMonth.setMonth(today.getMonth() + 1);
 
-                        document.getElementById('giftExpiryDate').innerText = `${day} ${month} ${year}`;
+                            // Format Date (Thai)
+                            const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+                            const day = nextMonth.getDate();
+                            const month = months[nextMonth.getMonth()];
+                            const year = nextMonth.getFullYear() + 543;
+
+                            document.getElementById('giftExpiryDate').innerText = `${day} ${month} ${year}`;
+                        }
 
                         showView('giftView');
                         return; // Stop here, don't check registration
