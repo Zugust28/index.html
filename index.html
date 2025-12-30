@@ -275,7 +275,27 @@
         <div id="successView" class="view-section" style="text-align: center;">
             <div style="font-size: 50px; color: var(--primary-color); margin-bottom: 20px;">✅</div>
             <h2>บันทึกเรียบร้อย</h2>
-            <p>ขอบคุณที่ให้ข้อมูลค่ะ</p>
+            <p>ขอบคุณที่ให้ข้อมูลครับ</p>
+        </div>
+
+        <!-- View 5: Gift / Coupon -->
+        <div id="giftView" class="view-section" style="text-align: center;">
+            <div style="font-size: 60px; margin-bottom: 20px;">🎁</div>
+            <h2>สุขสันต์วันเกิด!</h2>
+            <p>ขอบคุณที่ไว้วางใจให้เราดูแลคุณมาตลอดครับ</p>
+
+            <div
+                style="background: #f0fdf4; border: 2px dashed #1DB446; padding: 20px; border-radius: 12px; margin: 20px 0;">
+                <h3 style="color: #1DB446; margin: 0;">คูปองส่วนลด 500 บาท</h3>
+                <p style="margin-top: 5px; font-size: 12px; color: #888;">สำหรับทำหัตถการใดก็ได้ (ขั้นต่ำ 2,000 บาท)</p>
+                <div
+                    style="background: white; padding: 10px; margin-top: 15px; font-weight: bold; letter-spacing: 2px; border-radius: 4px; border: 1px solid #ddd;">
+                    BDAY2025
+                </div>
+            </div>
+
+            <p style="font-size: 12px; color: #aaa;">*กรุณาแสดงหน้าจอนี้กับพนักงานเมื่อใช้บริการ</p>
+            <button onclick="liff.closeWindow()">ปิดหน้าต่าง</button>
         </div>
 
     </div>
@@ -283,7 +303,7 @@
     <script>
         // --- CONFIGURATION ---
         const LIFF_ID = "2007784481-qWTVx4hJ";
-        const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycbz9kYdnbBxCsQYlkMC1YGtu9JT1NZ6lbNZfb9CrONMZz4-3BBRMmRNzaquWC__GsnG_4g/exec"
+        const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycbwTyAh9mQ8lPIvpvDLKWd6pBe3J5E79nkl5275WaCNRFRYLZBOE3kMf5Xjom_jivev7DA/exec"
 
         // State
         let currentUserId = null;
@@ -296,8 +316,18 @@
 
         // --- 1. INITIALIZATION ---
         window.onload = function () {
+            // Check for URL Params (e.g. ?view=gift)
+            const urlParams = new URLSearchParams(window.location.search);
+            const viewParam = urlParams.get('view');
+
             liff.init({ liffId: LIFF_ID })
                 .then(() => {
+                    // Specific View Logic
+                    if (viewParam === 'gift') {
+                        showView('giftView');
+                        return; // Stop here, don't check registration
+                    }
+
                     if (!liff.isLoggedIn()) {
                         liff.login();
                     } else {
@@ -309,7 +339,8 @@
                 })
                 .catch((err) => {
                     console.error('LIFF Init failed', err);
-                    alert('LIFF Error: ' + err);
+                    // alert('LIFF Error: ' + err); // Suppress alert for cleaner UX if config is missing, but better to show if testing
+                    document.getElementById('loadingView').innerHTML = `<p style="color:red">Error: ${err.message}<br>Please check LIFF_ID configuration.</p>`;
                 });
         };
 
