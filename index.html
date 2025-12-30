@@ -33,8 +33,8 @@
             width: 100%;
             max-width: 400px;
             box-sizing: border-box;
-            display: none;
-            /* Hide all by default */
+            display: block;
+            /* Change to block to ensure visibility if JS fails */
         }
 
         h2 {
@@ -198,12 +198,22 @@
         }
     </style>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+        // Global Error Handler
+        window.onerror = function (msg, url, line) {
+            const errBox = document.getElementById('loadingView');
+            if (errBox) {
+                errBox.innerHTML = `<p style="color:red; text-align:left; padding:10px;">BSOD in JS:<br>${msg}<br>Line: ${line}</p>`;
+            }
+            return false;
+        };
+    </script>
 </head>
 
 <body>
 
     <!-- Main Container -->
-    <div class="container" id="mainContainer" style="display: block;">
+    <div class="container" id="mainContainer">
 
         <!-- View 1: Loading -->
         <div id="loadingView" class="view-section active">
@@ -306,7 +316,7 @@
     <script>
         // --- CONFIGURATION ---
         const LIFF_ID = "2007784481-qWTVx4hJ";
-        const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycbwMZKO1ke397xlOaARSZIsWHAUWIvp4_QHWd3K8OZxjb0Ezl7ngdSn_RTdERyyoOi0uIQ/exec"
+        const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycbyGdOKXIDXU8lhW58hVBxZiORMFpoUssVK1yuiZZ_QbJPjACmAM0qLAZtucbr4FmAum/exec";
 
         // State
         let currentUserId = null;
@@ -314,57 +324,57 @@
         // Navigation Helper
         function showView(viewId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
+            const vw = document.getElementById(viewId);
+            if (vw) vw.classList.add('active');
         }
 
         // --- 1. INITIALIZATION ---
         window.onload = function () {
             // Check for URL Params (e.g. ?view=gift)
-            const urlParams = new URLSearchParams(window.location.search);
-            const viewParam = urlParams.get('view');
+            const params = new URLSearchParams(window.location.search);
+            const viewParam = params.get('view');
 
             liff.init({ liffId: LIFF_ID })
                 .then(() => {
-                    // Specific View Logic
+                    // Logic: Gift View
                     if (viewParam === 'gift') {
-                        // Check if Expiry passed from URL
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const expParam = urlParams.get('exp');
+                        const expParam = params.get('exp');
+                        const el = document.getElementById('giftExpiryDate');
 
-                        if (expParam) {
-                            document.getElementById('giftExpiryDate').innerText = expParam;
-                        } else {
-                            // Fallback: Calculate Expiry Date (Today + 1 Month)
-                            const today = new Date();
-                            const nextMonth = new Date(today);
-                            nextMonth.setMonth(today.getMonth() + 1);
-
-                            // Format Date (Thai)
-                            const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-                            const day = nextMonth.getDate();
-                            const month = months[nextMonth.getMonth()];
-                            const year = nextMonth.getFullYear() + 543;
-
-                            document.getElementById('giftExpiryDate').innerText = `${day} ${month} ${year}`;
+                        if (el) {
+                            if (expParam) {
+                                el.innerText = expParam;
+                            } else {
+                                // Fallback
+                                const today = new Date();
+                                const nextMonth = new Date(today);
+                                nextMonth.setMonth(today.getMonth() + 1);
+                                const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+                                const day = nextMonth.getDate();
+                                const month = months[nextMonth.getMonth()];
+                                const year = nextMonth.getFullYear() + 543;
+                                el.innerText = `${day} ${month} ${year}`;
+                            }
                         }
-
                         showView('giftView');
-                        return; // Stop here, don't check registration
+                        return;
                     }
 
+                    // Logic: Regular Login
                     if (!liff.isLoggedIn()) {
                         liff.login();
                     } else {
                         liff.getProfile().then(profile => {
                             currentUserId = profile.userId;
                             checkRegistrationStatus(profile.userId);
+                        }).catch(e => {
+                            document.getElementById('loadingView').innerHTML = `<p style="color:red">Profile Warning: ${e.message}</p>`;
                         });
                     }
                 })
                 .catch((err) => {
                     console.error('LIFF Init failed', err);
-                    // alert('LIFF Error: ' + err); // Suppress alert for cleaner UX if config is missing, but better to show if testing
-                    document.getElementById('loadingView').innerHTML = `<p style="color:red">Error: ${err.message}<br>Please check LIFF_ID configuration.</p>`;
+                    document.getElementById('loadingView').innerHTML = `<p style="color:red">LIFF Init Error: ${err.message}<br>Check LIFF ID setting.</p>`;
                 });
         };
 
@@ -378,18 +388,17 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data && data.registered && data.profile) {
-                        // Registered -> Show Profile
                         updateProfileUI(data.profile);
                         showView('profileView');
                     } else {
-                        // Not registered -> Show Register
                         showView('registerView');
                     }
                 })
                 .catch(err => {
                     console.error(err);
-                    // Fallback: If error, maybe show register to be safe?
-                    alert('Connection Error. Please try refreshing.');
+                    document.getElementById('loadingView').innerHTML += `<p style="color:red; font-size:10px;">Fetch Error: ${err.message}</p>`;
+                    // Fallback to register if fetch fails (e.g. CORS/Server error)
+                    setTimeout(() => showView('registerView'), 2000);
                 });
         }
 
@@ -419,11 +428,9 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.profile) {
-                        // Success -> Go to Profile
                         updateProfileUI(data.profile);
                         showView('profileView');
                     } else {
-                        // Failed
                         errDiv.innerText = 'ไม่พบเบอร์โทรศัพท์ในระบบ หรือเบอร์ไม่ถูกต้อง';
                         errDiv.style.display = 'block';
                         btn.disabled = false;
@@ -431,7 +438,7 @@
                     }
                 })
                 .catch(err => {
-                    errDiv.innerText = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+                    errDiv.innerText = 'เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + err.message;
                     errDiv.style.display = 'block';
                     btn.disabled = false;
                     btn.innerText = 'ตรวจสอบและยืนยัน';
@@ -469,6 +476,13 @@
                     setTimeout(() => { liff.closeWindow(); }, 3000);
                 })
                 .catch(error => {
-                    alert('Error: ' + error);
+                    alert('Error: ' + error.message);
                     btn.disabled = false;
-       
+                    btn.innerText = 'ส่งข้อมูล';
+                });
+        });
+
+    </script>
+</body>
+
+</html>
