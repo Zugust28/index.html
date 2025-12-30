@@ -287,11 +287,7 @@
             <div
                 style="background: #f0fdf4; border: 2px dashed #1DB446; padding: 20px; border-radius: 12px; margin: 20px 0;">
                 <h3 style="color: #1DB446; margin: 0;">คูปองส่วนลด 5%</h3>
-                <p style="margin-top: 5px; font-size: 12px; color: #888;">อายุการใช้งาน 30 วัน</p>
-                <div
-                    style="background: white; padding: 10px; margin-top: 15px; font-weight: bold; letter-spacing: 2px; border-radius: 4px; border: 1px solid #ddd;">
-                    BDAY2025
-                </div>
+                <p style="margin-top: 5px; font-size: 12px; color: #888;">ใช้ได้กับทุกยอดชำระ ไม่มีขั้นต่ำ</p>
             </div>
 
             <p style="font-size: 12px; color: #aaa;">*กรุณาแสดงหน้าจอนี้กับพนักงานเมื่อใช้บริการ</p>
@@ -303,7 +299,7 @@
     <script>
         // --- CONFIGURATION ---
         const LIFF_ID = "2007784481-qWTVx4hJ";
-        const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycbz6H2phgunGkXtTpH7uTA6RVQI3DliC1oMq2zwCJR0OBj433h9JGX34omfZRZH_H7Mp8w/exec"
+        const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycbzaK3yxA621kxJzEkwN710McT8XUENp9PMGrnsKcdf0XZscuvR33TDXO9eBvDujrs10/exec"
 
         // State
         let currentUserId = null;
@@ -324,6 +320,22 @@
                 .then(() => {
                     // Specific View Logic
                     if (viewParam === 'gift') {
+                        // Calculate Expiry Date (Today + 1 Month)
+                        const today = new Date();
+                        const nextMonth = new Date(today);
+                        nextMonth.setMonth(today.getMonth() + 1);
+
+                        // Format Date (Thai)
+                        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                        // Add 543 for Thai Year if needed, but standard locale usually handles it if locale is th-TH-u-nu-latn or similar. 
+                        // Let's do manual mapping for safety across browsers.
+                        const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+                        const day = nextMonth.getDate();
+                        const month = months[nextMonth.getMonth()];
+                        const year = nextMonth.getFullYear() + 543;
+
+                        document.getElementById('giftExpiryDate').innerText = `${day} ${month} ${year}`;
+
                         showView('giftView');
                         return; // Stop here, don't check registration
                     }
