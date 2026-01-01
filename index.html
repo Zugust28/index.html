@@ -240,6 +240,14 @@
             </form>
         </div>
 
+        <!-- View 2.5: Register Success (Thank You) -->
+        <div id="registerSuccessView" class="view-section" style="text-align: center;">
+            <div style="font-size: 50px; color: var(--primary-color); margin-bottom: 20px;">🎉</div>
+            <h2>ลงทะเบียนสำเร็จ!</h2>
+            <p>ระบบได้เชื่อมต่อข้อมูลของคุณเรียบร้อยแล้ว</p>
+            <p style="font-size: 12px; color: #888;">หน้าต่างจะปิดอัตโนมัติ...</p>
+        </div>
+
         <!-- View 3: Profile Confirmation -->
         <div id="profileView" class="view-section">
             <h2>ข้อมูลลูกค้า</h2>
@@ -320,7 +328,7 @@
     <script>
         // --- CONFIGURATION ---
         const LIFF_ID = "2007736475-HCPXQKEU";
-        const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycby8n87G0JAqD9_ee6Y7T7mKSjqU2gb1qOsqBr6Pe2sRskIpBpmKux8tA8N8gOC4ZQdqSA/exec";
+        const GAS_EXEC_URL = "https://script.google.com/macros/s/AKfycbyHZpc0ArJxq0wYHJqykVfkpXSwUFIu50D3FgbyVosxOsaolB2J2_Tt68GEgRlTaTQRYw/exec";
 
         // State
         let currentUserId = null;
@@ -384,6 +392,9 @@
 
         // --- 2. CHECK STATUS ---
         function checkRegistrationStatus(uid) {
+            const params = new URLSearchParams(window.location.search);
+            const viewParam = params.get('view'); // 'form' or 'gift'
+
             fetch(GAS_EXEC_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -393,7 +404,14 @@
                 .then(data => {
                     if (data && data.registered && data.profile) {
                         updateProfileUI(data.profile);
-                        showView('profileView');
+
+                        // Direct Navigation based on Param
+                        if (viewParam === 'form') {
+                            showView('formView');
+                        } else {
+                            // Default: Show Profile
+                            showView('profileView');
+                        }
                     } else {
                         showView('registerView');
                     }
@@ -401,7 +419,6 @@
                 .catch(err => {
                     console.error(err);
                     document.getElementById('loadingView').innerHTML += `<p style="color:red; font-size:10px;">Fetch Error: ${err.message}</p>`;
-                    // Fallback to register if fetch fails (e.g. CORS/Server error)
                     setTimeout(() => showView('registerView'), 2000);
                 });
         }
@@ -433,7 +450,9 @@
                 .then(data => {
                     if (data.success && data.profile) {
                         updateProfileUI(data.profile);
-                        showView('profileView');
+                        // Show "Thank You" and Close
+                        showView('registerSuccessView');
+                        setTimeout(() => { liff.closeWindow(); }, 3000);
                     } else {
                         errDiv.innerText = 'ไม่พบเบอร์โทรศัพท์ในระบบ หรือเบอร์ไม่ถูกต้อง';
                         errDiv.style.display = 'block';
